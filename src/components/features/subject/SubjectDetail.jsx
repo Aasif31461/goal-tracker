@@ -260,6 +260,7 @@ export default function SubjectDetail({
                                                 onChange={(val) => onUpdateTopicNotes(subject.id, topic.id, val)}
                                                 placeholder="Add detailed notes for this topic... (Markdown supported)"
                                                 minHeight="300px"
+                                                maxHeight="80vh"
                                                 className="shadow-inner"
                                                 pdfFilename={`${subject.name} - ${topic.title}`}
                                             />

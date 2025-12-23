@@ -45,23 +45,27 @@ export default function Timer({ onExit, onSessionComplete }) {
     return (
         <div className={`fixed inset-0 z-50 bg-gradient-to-br ${bgGradient} text-white flex flex-col animate-in fade-in duration-500`}>
             {/* Header Controls */}
-            <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
-                <button onClick={onExit} className="bg-white/10 hover:bg-white/20 p-2 rounded-full backdrop-blur-md transition-all">
-                    <ArrowLeft />
-                </button>
-                <div className="flex gap-2 bg-black/20 p-1 rounded-xl backdrop-blur-md">
+            <div className="absolute top-0 left-0 right-0 p-6 flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
+                <div className="w-full sm:w-auto flex justify-between sm:block">
+                    <button onClick={onExit} className="bg-white/10 hover:bg-white/20 p-2 rounded-full backdrop-blur-md transition-all">
+                        <ArrowLeft />
+                    </button>
+                    {/* Placeholder for symmetry on mobile if needed, or just remove */}
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-2 bg-black/20 p-1 rounded-xl backdrop-blur-md">
                     <button onClick={() => setDuration(25, 'focus')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${mode === 'focus' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-300 hover:text-white'}`}>Focus</button>
                     <button onClick={() => setDuration(5, 'shortBreak')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${mode === 'shortBreak' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-300 hover:text-white'}`}>Short Break</button>
                     <button onClick={() => setDuration(15, 'longBreak')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${mode === 'longBreak' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-300 hover:text-white'}`}>Long Break</button>
                 </div>
-                <div className="w-10"></div>
+                <div className="w-10 hidden sm:block"></div>
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center relative">
                 {/* Breathing Circle Effect */}
-                <div className={`absolute w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl ${isRunning ? 'animate-pulse' : ''} transition-all duration-[3000ms]`}></div>
+                <div className={`absolute w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl ${isRunning ? 'animate-pulse' : ''} transition-all duration-[3000ms] scale-75 md:scale-100`}></div>
 
-                <div className="text-[12rem] md:text-[16rem] font-bold font-mono tracking-tighter leading-none relative z-10 drop-shadow-2xl">
+                <div className="text-[20vw] sm:text-[10rem] md:text-[12rem] lg:text-[16rem] font-bold font-mono tracking-tighter leading-none relative z-10 drop-shadow-2xl select-none">
                     {formatTime(timer)}
                 </div>
 
@@ -92,10 +96,6 @@ export default function Timer({ onExit, onSessionComplete }) {
                 </form>
             </div>
 
-            {/* Sound Toggle (Visual only for now) */}
-            <div className="absolute bottom-6 right-6 text-white/30 hover:text-white transition-colors cursor-pointer">
-                <Volume2 size={24} />
-            </div>
         </div>
     );
 }

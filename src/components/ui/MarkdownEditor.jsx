@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import 'highlight.js/styles/github-dark.css';
 
-export default function MarkdownEditor({ value, onChange, placeholder, minHeight = "200px", className = "", pdfFilename = "notes" }) {
+export default function MarkdownEditor({ value, onChange, placeholder, minHeight = "200px", maxHeight = "80vh", className = "", pdfFilename = "notes" }) {
     // Default to 'preview' and 'light' theme as requested
     const [mode, setMode] = useState('preview');
     const [previewTheme, setPreviewTheme] = useState('light');
@@ -91,24 +91,33 @@ export default function MarkdownEditor({ value, onChange, placeholder, minHeight
         const clone = element.cloneNode(true);
 
         // Sanitize the clone to remove incompatible styles (oklch)
-        // 1. Remove Tailwind classes that might set oklch colors
+        // 1. Sanitize the clone by converting computed styles to explicit hex values
+        // This is crucial because html2canvas uses computed styles, and if Tailwind v4 or a theme employs oklch, it will crash.
         const descendants = clone.getElementsByTagName('*');
         for (let i = 0; i < descendants.length; i++) {
             const el = descendants[i];
-            const classesToRemove = [];
-            el.classList.forEach(cls => {
-                // Target bg-*, text-*, border-*, ring-* classes that might map to oklch vars
-                if (cls.startsWith('bg-') || cls.startsWith('text-') || cls.startsWith('border-') || cls.startsWith('ring-')) {
-                    classesToRemove.push(cls);
-                }
-            });
-            el.classList.remove(...classesToRemove);
 
-            // Explicitly force transparent background on text elements to avoid potential default browser behavior or inherited weirdness
-            if (!['PRE', 'CODE', 'TABLE', 'TH', 'TD'].includes(el.tagName)) {
+            // Get computed style of the ORIGINAL element if possible? 
+            // Actually, we can just enforce safe defaults for the clone since it's for print.
+
+            // Force text color to black
+            el.style.color = '#000000';
+
+            // Force background to transparent unless it's a code block or specific element
+            // We want to avoid capturing complex gradient backgrounds that might use modern css features
+            const tagName = el.tagName;
+            if (!['PRE', 'CODE', 'TH', 'TD', 'TR', 'TABLE'].includes(tagName)) {
                 el.style.backgroundColor = 'transparent';
-                el.style.color = '#000000'; // Force black text for PDF
+                el.style.backgroundImage = 'none';
+                el.style.borderColor = '#e2e8f0'; // Safe slate-200 for borders
+            } else if (tagName === 'PRE' || tagName === 'CODE') {
+                el.style.backgroundColor = '#f1f5f9'; // Safe slate-100 for code
+                el.style.color = '#000000';
             }
+
+            // Remove all classes that might trigger Tailwind's modern color vars
+            el.removeAttribute('class');
+            // We stripped all classes! We rely on the prose styles injected below.
         }
 
         // 2. Inject Style Override for Prose Variables
@@ -143,6 +152,9 @@ export default function MarkdownEditor({ value, onChange, placeholder, minHeight
         clone.style.color = '#000000';
         clone.style.padding = '20px';
         clone.style.maxWidth = '100%';
+        clone.style.height = 'auto';
+        clone.style.maxHeight = 'none';
+        clone.style.overflow = 'visible';
 
         // Wrap in hidden container
         const container = document.createElement('div');
@@ -318,8 +330,8 @@ export default function MarkdownEditor({ value, onChange, placeholder, minHeight
                         onChange={(e) => handleChange(e.target.value)}
                         onPaste={handlePaste}
                         placeholder={placeholder || "Type your markdown here..."}
-                        className="w-full h-full p-4 bg-transparent text-slate-200 placeholder:text-slate-600 outline-none resize-none font-mono text-sm leading-relaxed"
-                        style={{ minHeight }}
+                        className="w-full h-full p-4 bg-transparent text-slate-200 placeholder:text-slate-600 outline-none resize-none font-mono text-sm leading-relaxed custom-scrollbar"
+                        style={{ minHeight, maxHeight }}
                     />
                 ) : (
                     <div
@@ -328,7 +340,7 @@ export default function MarkdownEditor({ value, onChange, placeholder, minHeight
                             ? 'bg-slate-950/30 prose prose-invert prose-sm'
                             : 'bg-white text-slate-900 prose prose-slate prose-sm shadow-inner'
                             }`}
-                        style={{ height: '100%', minHeight }}
+                        style={{ minHeight, maxHeight }}
                     >
                         {value ? (
                             <ReactMarkdown

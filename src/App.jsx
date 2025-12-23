@@ -48,7 +48,7 @@ export default function App() {
   const activeGoal = goals.find(g => g.id === activeGoalId);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-indigo-500 selection:text-white overflow-x-hidden">
 
       {/* Sidebar Navigation */}
       <Sidebar
@@ -60,7 +60,7 @@ export default function App() {
         onAddGoal={() => setActiveGoalId(null)}
       />
 
-      <div className="flex-1 flex flex-col min-h-screen transition-all md:pl-0">
+      <div className="flex-1 flex flex-col min-h-screen transition-all md:pl-0 w-full max-w-[100vw] overflow-x-hidden">
 
         {/* Mobile Header / Hamburger */}
         <div className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center gap-4">

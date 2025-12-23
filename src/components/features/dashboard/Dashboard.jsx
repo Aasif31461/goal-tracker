@@ -74,7 +74,7 @@ export default function Dashboard({
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
             {/* Header & Main Stats */}
             <div className="bg-slate-900 rounded-3xl shadow-xl overflow-hidden border border-slate-800">
-                <div className="bg-slate-950 p-6 sm:p-8 relative overflow-hidden">
+                <div className="bg-slate-950 p-4 sm:p-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-indigo-500">
                         <Target size={200} />
                     </div>
@@ -83,7 +83,7 @@ export default function Dashboard({
 
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-black flex items-center gap-3 text-white tracking-tight">
+                            <h1 className="text-2xl md:text-4xl font-black flex items-center gap-3 text-white tracking-tight">
                                 Study Planner
                                 <span className="hidden md:inline-flex text-indigo-400 text-xs font-bold uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">{subjects.length > 0 ? 'ExamSprint' : 'Dashboard'}</span>
                             </h1>
@@ -97,8 +97,8 @@ export default function Dashboard({
                             </button>
                         </div>
 
-                        <div className="flex flex-col gap-3 items-end">
-                            <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 flex flex-col gap-1 min-w-[200px] shadow-lg">
+                        <div className="flex flex-col gap-3 w-full md:w-auto md:items-end">
+                            <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 flex flex-col gap-1 w-full md:min-w-[200px] shadow-lg">
                                 <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                                     <Calendar size={12} /> Global Finish Date
                                 </label>
@@ -111,7 +111,7 @@ export default function Dashboard({
                             </div>
 
                             {/* Data Controls */}
-                            <div className="flex gap-2 w-full">
+                            <div className="flex flex-wrap gap-2 w-full">
                                 <button
                                     onClick={onExport}
                                     className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-slate-700"
@@ -223,14 +223,16 @@ export default function Dashboard({
                                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">Attention Needed</h3>
                                 {subjectsNeedingAttention.map((item, idx) => (
                                     <div key={idx} className="bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden group hover:border-slate-700 transition-colors">
-                                        <div className="bg-slate-950/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-xl bg-gradient-to-br ${item.subject.color} text-white shadow-lg`}>
+                                        <div className="bg-slate-950/50 px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 w-full sm:w-auto min-w-0">
+                                                <div className={`p-2 rounded-xl bg-gradient-to-br ${item.subject.color} text-white shadow-lg shrink-0`}>
                                                     {getIcon(item.subject.iconType, "w-4 h-4")}
                                                 </div>
-                                                <span className="font-bold text-slate-200 text-lg">{item.subject.name}</span>
+                                                <span className="font-bold text-slate-200 text-base sm:text-lg truncate">{item.subject.name}</span>
                                             </div>
-                                            <Badge type="warning">Target: {Math.ceil(item.velocity)}</Badge>
+                                            <div className="flex sm:block justify-end w-full sm:w-auto">
+                                                <Badge type="warning">Target: {Math.ceil(item.velocity)}</Badge>
+                                            </div>
                                         </div>
 
                                         <div className="divide-y divide-slate-800">
@@ -258,13 +260,14 @@ export default function Dashboard({
                                                         </div>
 
                                                         {isNotesOpen && (
-                                                            <div className="px-12 pb-6 animate-in slide-in-from-top-2">
+                                                            <div className="px-4 md:px-12 pb-6 animate-in slide-in-from-top-2">
                                                                 <div className="relative group/input">
                                                                     <MarkdownEditor
                                                                         value={topic.notes || ""}
                                                                         onChange={(val) => onUpdateTopicNotes(item.subject.id, topic.id, val)}
                                                                         placeholder="Add quick notes, formulas, or key concepts here..."
                                                                         minHeight="150px"
+                                                                        maxHeight="80vh"
                                                                         className="shadow-inner"
                                                                         pdfFilename={`${item.subject.name} - ${topic.title}`}
                                                                     />
@@ -358,6 +361,7 @@ export default function Dashboard({
                                 onChange={setScratchpad}
                                 placeholder="Write anything here... Ideas, quick tasks, or random thoughts. Markdown supported!"
                                 minHeight="500px"
+                                maxHeight="80vh"
                                 className="border-amber-900/30 bg-amber-900/10"
                                 pdfFilename="Brain Dump"
                             />
