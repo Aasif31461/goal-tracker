@@ -166,7 +166,7 @@ export default function ExamSprintTracker({ goalId, onBack }) {
     };
 
     if (!onboardingComplete) {
-        return <Onboarding onComplete={handleOnboardingComplete} initialSubjects={subjects} />;
+        return <Onboarding onComplete={handleOnboardingComplete} initialSubjects={subjects} onImport={handleImport} />;
     }
 
     return (

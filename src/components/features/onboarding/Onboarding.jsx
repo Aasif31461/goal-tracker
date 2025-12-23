@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Sparkles, Plus, Trash2, ArrowRight, Minus, Check, BookOpen } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { ArrowLeft, Sparkles, Plus, Trash2, ArrowRight, Minus, Check, BookOpen, Upload } from 'lucide-react';
 import { ICON_OPTIONS, COLORS } from '../../../data/constants';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
@@ -9,9 +9,20 @@ const getIcon = (type, className) => {
     return <IconComponent className={className} />;
 };
 
-export default function Onboarding({ onComplete, goalId, initialSubjects = [] }) {
+export default function Onboarding({ onComplete, goalId, initialSubjects = [], onImport }) {
+    // ... (existing state) ...
+    // ...
+    // ...
+
     // Use persistent state for the onboarding draft
     const draftKey = `onboarding_draft_${goalId || 'default'}`;
+
+    const fileInputRef = useRef(null);
+    const handleImportClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
 
     // If editing (initialSubjects has data), start at Step 1, otherwise 0
     const [step, setStep] = useLocalStorage(`${draftKey}_step`, initialSubjects.length > 0 ? 1 : 0);
@@ -55,8 +66,9 @@ export default function Onboarding({ onComplete, goalId, initialSubjects = [] })
             .map(line => line.trim())
             .filter(line => line.length > 0)
             .map((line, index) => {
-                // Remove leading numbers (e.g., "1. Matches", "2) Matches")
-                const cleanName = line.replace(/^\d+[\.\)]\s*/, '').trim();
+                // Remove leading numbers (e.g., "1. ", "2) ") if present
+                // Also handles lines without numbers correctly
+                const cleanName = line.replace(/^\s*\d+[\.\)]\s*/, '').trim();
 
                 // Assign random icon
                 const randomIcon = ICON_OPTIONS[Math.floor(Math.random() * ICON_OPTIONS.length)].id;
@@ -127,6 +139,12 @@ export default function Onboarding({ onComplete, goalId, initialSubjects = [] })
         onComplete(finalSubjects);
     };
 
+    const handleClearAll = () => {
+        if (window.confirm("Are you sure you want to delete all subjects?")) {
+            setSetupSubjects([{ id: Date.now(), name: "", iconType: 'book', examDate: "", topicCount: 14, topics: [] }]);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
             {/* Background Gradient Mesh */}
@@ -158,20 +176,49 @@ export default function Onboarding({ onComplete, goalId, initialSubjects = [] })
                                     Build your personalized study plan. Track exams, manage topics, and focus like a pro.
                                 </p>
                             </div>
-                            <button
-                                onClick={() => setStep(1)}
-                                className="bg-indigo-600 hover:bg-indigo-500 text-white text-lg font-bold px-12 py-4 rounded-2xl shadow-lg shadow-indigo-900/50 hover:shadow-indigo-900/80 transition-all transform hover:-translate-y-1"
-                            >
-                                Let's Get Started
-                            </button>
+                            <div className="flex flex-col gap-4 w-full max-w-xs">
+                                <button
+                                    onClick={() => setStep(1)}
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-lg font-bold px-12 py-4 rounded-2xl shadow-lg shadow-indigo-900/50 hover:shadow-indigo-900/80 transition-all transform hover:-translate-y-1 w-full"
+                                >
+                                    Let's Get Started
+                                </button>
+                                {onImport && (
+                                    <>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={onImport}
+                                            accept=".json"
+                                            className="hidden"
+                                        />
+                                        <button
+                                            onClick={handleImportClick}
+                                            className="text-slate-500 hover:text-indigo-400 font-medium text-sm flex items-center justify-center gap-2 transition-colors py-2"
+                                        >
+                                            <Upload size={16} /> Import from Backup
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     )}
 
                     {step === 1 && (
                         <div className="flex-1 flex flex-col animate-in slide-in-from-right duration-300">
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-white mb-2">Define Your Subjects</h2>
-                                <p className="text-slate-400">What are you studying? Add them below.</p>
+                            <div className="flex justify-between items-center mb-8">
+                                <div>
+                                    <h2 className="text-3xl font-bold text-white mb-2">Define Your Subjects</h2>
+                                    <p className="text-slate-400">What are you studying? Add them below.</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleClearAll}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors text-xs font-bold uppercase tracking-wider"
+                                    >
+                                        <Trash2 size={14} /> Clear All
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-6 custom-scrollbar">

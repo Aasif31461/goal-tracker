@@ -40,14 +40,9 @@ export default function SubjectDetail({
             .map(line => line.trim())
             .filter(line => line.length > 0)
             .map((line, index) => {
-                // Remove leading numbering like "1.", "1)", "Unit 01:"
-                // Strategy: Remove "1." or "1)" start, then optionally "Unit \d+:" 
-                // User Example: "1. Unit 01: ..." -> Remove "1. " first. Then maybe clear "Unit 01: " if desired?
-                // The user prompt: "1. Unit 01: Introduction..." -> "create 14 topics with given name"
-                // I will strip the list numbering "1. " but KEEP "Unit 01: " as part of the title if present,
-                // matching the user's likely intent to preserve the unit structure.
-
-                let cleanTitle = line.replace(/^\d+[\.\)]\s*/, '').trim();
+                // Clean start of line: removes "1.", "1)", etc.
+                // Keeps the rest of the text intact (e.g., "Unit 01: Intro")
+                let cleanTitle = line.replace(/^\s*\d+[\.\)]\s*/, '').trim();
 
                 return {
                     id: `${Date.now()}-${index}`, // Unique IDs

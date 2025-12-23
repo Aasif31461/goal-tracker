@@ -35,8 +35,8 @@
 - **Reset**: One-click "Nuclear Reset" to wipe all data and start fresh (protected by double confirmation).
 
 #### ⚡ **Bulk Operations (New!)**
-- **Bulk Subject Creation**: Paste a list of subjects (e.g., from your syllabus PDF) during onboarding to create them all at once.
-- **Bulk Topic Edit**: Swiftly replace a subject's topics by pasting a list. The system automatically cleans up numbering (e.g., "1. Unit 01" becomes "Unit 01").
+- **Bulk Subject Creation**: Paste a list of subjects (e.g., from your syllabus PDF) during onboarding to create them all at once. Handles numbered or unnumbered lists.
+- **Bulk Topic Edit**: Swiftly replace a subject's topics by pasting a list. The system automatically cleans up numbering (e.g., "1. Unit 01" becomes "Unit 01") and ignores extra whitespace.
 
 ### 📸 Screenshots
 
