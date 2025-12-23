@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Target, Clock, Calendar, Zap, List, PenTool, CheckCircle, FileText, Save, Settings } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Target, Clock, Calendar, Zap, List, PenTool, CheckCircle, FileText, Save, Settings, Download, Upload, Trash2 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { Badge } from '../../ui/Badge';
 import MarkdownEditor from '../../ui/MarkdownEditor';
@@ -21,10 +21,14 @@ export default function Dashboard({
     scratchpad,
     setScratchpad,
     onStartPomodoro,
-    onEditSubjects
+    onEditSubjects,
+    onExport,
+    onImport,
+    onReset
 }) {
     const [dashboardTab, setDashboardTab] = useState('agenda');
     const [expandedNoteId, setExpandedNoteId] = useState(null);
+    const fileInputRef = useRef(null);
 
     const sortedSubjects = [...subjects].sort((a, b) => {
         // Calculate effective dates (min of Global vs Exam)
@@ -93,16 +97,50 @@ export default function Dashboard({
                             </button>
                         </div>
 
-                        <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 flex flex-col gap-1 min-w-[200px] shadow-lg">
-                            <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                                <Calendar size={12} /> Global Finish Date
-                            </label>
-                            <input
-                                type="date"
-                                value={globalTargetDate}
-                                onChange={onGlobalDateChange}
-                                className="bg-transparent text-xl font-bold text-white outline-none w-full cursor-pointer hover:text-indigo-300 transition-colors [color-scheme:dark]"
-                            />
+                        <div className="flex flex-col gap-3 items-end">
+                            <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 flex flex-col gap-1 min-w-[200px] shadow-lg">
+                                <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                                    <Calendar size={12} /> Global Finish Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={globalTargetDate}
+                                    onChange={onGlobalDateChange}
+                                    className="bg-transparent text-xl font-bold text-white outline-none w-full cursor-pointer hover:text-indigo-300 transition-colors [color-scheme:dark]"
+                                />
+                            </div>
+
+                            {/* Data Controls */}
+                            <div className="flex gap-2 w-full">
+                                <button
+                                    onClick={onExport}
+                                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-slate-700"
+                                    title="Export Data to JSON"
+                                >
+                                    <Download size={14} /> Export
+                                </button>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-slate-700"
+                                    title="Import Data from JSON"
+                                >
+                                    <Upload size={14} /> Import
+                                </button>
+                                <button
+                                    onClick={onReset}
+                                    className="bg-slate-800 hover:bg-rose-900/30 text-rose-500/70 hover:text-rose-400 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-slate-700 hover:border-rose-500/30"
+                                    title="Reset All Data"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={onImport}
+                                    accept=".json"
+                                    className="hidden"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

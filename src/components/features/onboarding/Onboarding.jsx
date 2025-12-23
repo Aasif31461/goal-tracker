@@ -43,6 +43,46 @@ export default function Onboarding({ onComplete, goalId, initialSubjects = [] })
         setSetupSubjects(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
     };
 
+    // Bulk Add Logic
+    const [isBulkAddOpen, setIsBulkAddOpen] = useState(false);
+    const [bulkText, setBulkText] = useState("");
+
+    const handleBulkAdd = () => {
+        if (!bulkText.trim()) return;
+
+        const lines = bulkText.split('\n');
+        const newSubjects = lines
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map((line, index) => {
+                // Remove leading numbers (e.g., "1. Matches", "2) Matches")
+                const cleanName = line.replace(/^\d+[\.\)]\s*/, '').trim();
+
+                // Assign random icon
+                const randomIcon = ICON_OPTIONS[Math.floor(Math.random() * ICON_OPTIONS.length)].id;
+
+                return {
+                    id: Date.now() + index, // Ensure unique ID
+                    name: cleanName,
+                    iconType: randomIcon,
+                    examDate: "",
+                    topicCount: 14,
+                    topics: []
+                };
+            });
+
+        setSetupSubjects(prev => {
+            // If the only item is the default empty one, replace it
+            if (prev.length === 1 && !prev[0].name) {
+                return newSubjects;
+            }
+            return [...prev, ...newSubjects];
+        });
+
+        setBulkText("");
+        setIsBulkAddOpen(false);
+    };
+
     // Smart Merge: Reconcile new count while keeping existing topic data
     const reconcileTopics = (existingTopics, targetCount) => {
         const currentCount = existingTopics.length;
@@ -183,12 +223,51 @@ export default function Onboarding({ onComplete, goalId, initialSubjects = [] })
                                         </button>
                                     </div>
                                 ))}
+
+                                {/* Standard Add Button */}
                                 <button
                                     onClick={handleAddSetupSubject}
                                     className="w-full py-4 border border-dashed border-slate-700 rounded-xl text-slate-500 hover:border-indigo-500/50 hover:bg-indigo-500/5 hover:text-indigo-400 font-bold flex items-center justify-center gap-2 transition-all"
                                 >
                                     <Plus size={20} /> Add Another Subject
                                 </button>
+
+                                {/* Bulk Add Section */}
+                                <div className="mt-4 pt-4 border-t border-white/5">
+                                    <button
+                                        onClick={() => setIsBulkAddOpen(!isBulkAddOpen)}
+                                        className="text-xs font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-widest flex items-center gap-2 mb-2"
+                                    >
+                                        <Sparkles size={14} /> Bulk Add from Text
+                                    </button>
+
+                                    {isBulkAddOpen && (
+                                        <div className="bg-slate-900 rounded-xl border border-slate-700 p-4 animate-in slide-in-from-top-2">
+                                            <p className="text-xs text-slate-500 mb-2">Paste a list of subjects (one per line). We'll handle numbering cleanup.</p>
+                                            <textarea
+                                                value={bulkText}
+                                                onChange={(e) => setBulkText(e.target.value)}
+                                                placeholder={`1. Discrete Mathematics\n2. Data Visualization\n3. Python Programming`}
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white placeholder:text-slate-700 h-32 focus:ring-2 focus:ring-indigo-500/50 outline-none mb-3 font-mono"
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => setIsBulkAddOpen(false)}
+                                                    className="px-4 py-2 text-slate-500 text-xs font-bold hover:text-white transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleBulkAdd}
+                                                    disabled={!bulkText.trim()}
+                                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-lg shadow-indigo-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                                >
+                                                    Generate Subjects
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex justify-end pt-4 border-t border-white/5">

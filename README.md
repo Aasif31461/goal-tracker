@@ -29,6 +29,15 @@
 - **Smart Formatting**: Converts your Markdown notes into professionally styled PDFs.
 - **Context-Aware Filenames**: Downloads are automatically named (e.g., `Python - Recursion.pdf`) for easy organization.
 
+#### 💾 **Data Management (New!)**
+- **Export & Share**: Export your entire workspace (subjects, notes, progress) to a JSON file. Backup your data or share your study plan with friends.
+- **Import**: Restore your progress from any exported file.
+- **Reset**: One-click "Nuclear Reset" to wipe all data and start fresh (protected by double confirmation).
+
+#### ⚡ **Bulk Operations (New!)**
+- **Bulk Subject Creation**: Paste a list of subjects (e.g., from your syllabus PDF) during onboarding to create them all at once.
+- **Bulk Topic Edit**: Swiftly replace a subject's topics by pasting a list. The system automatically cleans up numbering (e.g., "1. Unit 01" becomes "Unit 01").
+
 ### 📸 Screenshots
 
 | **Interactive Dashboard** | **Smart Rich Paste** |

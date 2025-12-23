@@ -22,10 +22,50 @@ export default function SubjectDetail({
     onUpdateSubjectName,
     onUpdateSubjectIcon,
     onAddTopic,
-    onDeleteTopic
+    onDeleteTopic,
+    onReplaceTopics
 }) {
     const [expandedNoteId, setExpandedNoteId] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+
+    // Bulk Edit State
+    const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
+    const [bulkTopicText, setBulkTopicText] = useState("");
+
+    const handleBulkUpdate = () => {
+        if (!bulkTopicText.trim()) return;
+
+        const lines = bulkTopicText.split('\n');
+        const newTopics = lines
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map((line, index) => {
+                // Remove leading numbering like "1.", "1)", "Unit 01:"
+                // Strategy: Remove "1." or "1)" start, then optionally "Unit \d+:" 
+                // User Example: "1. Unit 01: ..." -> Remove "1. " first. Then maybe clear "Unit 01: " if desired?
+                // The user prompt: "1. Unit 01: Introduction..." -> "create 14 topics with given name"
+                // I will strip the list numbering "1. " but KEEP "Unit 01: " as part of the title if present,
+                // matching the user's likely intent to preserve the unit structure.
+
+                let cleanTitle = line.replace(/^\d+[\.\)]\s*/, '').trim();
+
+                return {
+                    id: `${Date.now()}-${index}`, // Unique IDs
+                    title: cleanTitle,
+                    completed: false,
+                    notes: ""
+                };
+            });
+
+        if (newTopics.length > 0) {
+            if (window.confirm(`Replace all existing topics with these ${newTopics.length} new topics? This cannot be undone.`)) {
+                onReplaceTopics(subject.id, newTopics);
+                setIsBulkEditOpen(false);
+                setBulkTopicText("");
+                setIsEditing(false); // Optionally close edit mode
+            }
+        }
+    };
 
     if (!subject) return null;
 
@@ -234,12 +274,51 @@ export default function SubjectDetail({
                             );
                         })}
                         {isEditing && (
-                            <button
-                                onClick={() => onAddTopic(subject.id)}
-                                className="w-full py-4 text-slate-500 hover:text-indigo-400 hover:bg-white/5 font-bold text-sm flex items-center justify-center gap-2 transition-all border-t border-slate-800"
-                            >
-                                <Plus size={16} /> Add New Topic
-                            </button>
+                            <>
+                                {/* Bulk Edit Section */}
+                                <div className="p-4 bg-slate-800/20 border-t border-slate-800">
+                                    <button
+                                        onClick={() => setIsBulkEditOpen(!isBulkEditOpen)}
+                                        className="text-xs font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-widest flex items-center gap-2 mb-2"
+                                    >
+                                        <Edit2 size={12} /> Bulk Replace Topics
+                                    </button>
+
+                                    {isBulkEditOpen && (
+                                        <div className="bg-slate-900 rounded-xl border border-slate-700 p-4 animate-in slide-in-from-top-2 mt-2">
+                                            <p className="text-xs text-slate-500 mb-2">Paste a list of topics (one per line). Existing topics will be replaced!</p>
+                                            <textarea
+                                                value={bulkTopicText}
+                                                onChange={(e) => setBulkTopicText(e.target.value)}
+                                                placeholder={`1. Introduction\n2. Advanced Concepts\n3. Summary`}
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white placeholder:text-slate-700 h-32 focus:ring-2 focus:ring-indigo-500/50 outline-none mb-3 font-mono"
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => setIsBulkEditOpen(false)}
+                                                    className="px-4 py-2 text-slate-500 text-xs font-bold hover:text-white transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleBulkUpdate}
+                                                    disabled={!bulkTopicText.trim()}
+                                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-lg shadow-indigo-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                                >
+                                                    Update Topics
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() => onAddTopic(subject.id)}
+                                    className="w-full py-4 text-slate-500 hover:text-indigo-400 hover:bg-white/5 font-bold text-sm flex items-center justify-center gap-2 transition-all border-t border-slate-800"
+                                >
+                                    <Plus size={16} /> Add New Topic
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
