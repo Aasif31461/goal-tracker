@@ -97,27 +97,62 @@ export default function MarkdownEditor({ value, onChange, placeholder, minHeight
         for (let i = 0; i < descendants.length; i++) {
             const el = descendants[i];
 
-            // Get computed style of the ORIGINAL element if possible? 
-            // Actually, we can just enforce safe defaults for the clone since it's for print.
-
-            // Force text color to black
+            // Base safe defaults for print
             el.style.color = '#000000';
 
-            // Force background to transparent unless it's a code block or specific element
-            // We want to avoid capturing complex gradient backgrounds that might use modern css features
             const tagName = el.tagName;
             if (!['PRE', 'CODE', 'TH', 'TD', 'TR', 'TABLE'].includes(tagName)) {
                 el.style.backgroundColor = 'transparent';
                 el.style.backgroundImage = 'none';
-                el.style.borderColor = '#e2e8f0'; // Safe slate-200 for borders
+                el.style.background = 'none';
+                el.style.borderColor = '#e2e8f0';
             } else if (tagName === 'PRE' || tagName === 'CODE') {
-                el.style.backgroundColor = '#f1f5f9'; // Safe slate-100 for code
+                el.style.backgroundColor = '#f1f5f9';
                 el.style.color = '#000000';
             }
 
+            // Remove shadows and outlines which might carry oklch colors or gradients
+            el.style.boxShadow = 'none';
+            el.style.textShadow = 'none';
+            el.style.outline = 'none';
+
             // Remove all classes that might trigger Tailwind's modern color vars
             el.removeAttribute('class');
-            // We stripped all classes! We rely on the prose styles injected below.
+        }
+
+        // Extra safety: if any computed style on the clone still contains "oklch",
+        // overwrite the offending properties with safe fallbacks so html2canvas never sees them.
+        const sanitizeColorLikeProps = [
+            'color',
+            'backgroundColor',
+            'background',
+            'borderColor',
+            'borderTopColor',
+            'borderRightColor',
+            'borderBottomColor',
+            'borderLeftColor',
+            'outlineColor',
+            'boxShadow',
+            'textShadow'
+        ];
+
+        for (let i = 0; i < descendants.length; i++) {
+            const el = descendants[i];
+            const computed = window.getComputedStyle(el);
+
+            sanitizeColorLikeProps.forEach((prop) => {
+                const value = computed[prop];
+                if (value && typeof value === 'string' && value.includes('oklch')) {
+                    if (prop.toLowerCase().includes('shadow')) {
+                        el.style[prop] = 'none';
+                    } else if (prop.toLowerCase().includes('background')) {
+                        el.style.backgroundColor = '#ffffff';
+                        el.style.backgroundImage = 'none';
+                    } else {
+                        el.style[prop] = '#000000';
+                    }
+                }
+            });
         }
 
         // 2. Inject Style Override for Prose Variables
