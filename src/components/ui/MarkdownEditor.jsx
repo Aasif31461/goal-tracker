@@ -161,15 +161,22 @@ export default function MarkdownEditor({ value, onChange, placeholder, minHeight
         container.style.position = 'absolute';
         container.style.left = '-9999px';
         container.style.top = '0';
-        container.style.width = '800px';
+        // Slightly wider virtual page for better base resolution before scaling
+        container.style.width = '1024px';
         container.appendChild(clone);
         document.body.appendChild(container);
 
         const opt = {
             margin: 10,
             filename: `${pdfFilename}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            // Use high‑quality JPEG to keep text reasonably sharp without huge files
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: {
+                // Balanced scale: good sharpness with much smaller size than the previous PNG/3x setup
+                scale: 2,
+                useCORS: true,
+                logging: false
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
